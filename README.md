@@ -1,4 +1,4 @@
-**Live app:** URL goes here.
+**Live app:** [https://julian-nba-shot-quality.streamlit.app/](https://julian-nba-shot-quality.streamlit.app/)
 
 # NBA shot quality: what is a shot worth?
 
