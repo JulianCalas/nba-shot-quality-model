@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "shotquality"
 version = "1.0.0"
 description = "NBA shot quality: expected field-goal percentage, expected points, and shot-making over expected."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 readme = "README.md"
 authors = [{ name = "Julian Calas" }]
 dependencies = [

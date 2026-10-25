@@ -245,7 +245,7 @@ Denver’s shots were slightly below league quality and went in far more often t
 
 ## How to run
 
-Python 3.11 or newer. `.python-version` is 3.11. Streamlit Community Cloud does not read that file; set Python 3.11 in the deploy dialog under Advanced settings. The entry point is `app/streamlit_app.py` on `main`.
+Python 3.12. `.python-version` is 3.12. NumPy 2.5 does not publish a Python 3.11 wheel, so 3.11 cannot install `requirements.txt`. Streamlit Community Cloud defaults to 3.12 and does not read `.python-version`; leave the deploy dialog on 3.12 (Advanced settings). The entry point is `app/streamlit_app.py` on `main`.
 
 ```bash
 python -m venv .venv
