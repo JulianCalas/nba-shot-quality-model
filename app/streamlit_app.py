@@ -4,8 +4,10 @@ From the repository root:
 
     streamlit run app/streamlit_app.py --server.port 8741
 
-The app reads the holdout-season scores written by ``scripts/run_pipeline.py``.
-It does not refit the model. Color on the chart is expected FG%, not make/miss.
+The app reads the holdout-season scores written by ``scripts/run_pipeline.py``
+when those files are present. On a fresh clone it reads the compact extract in
+``data/app`` instead. It does not refit the model and it does not download
+data at startup. Color on the chart is expected FG%, not make/miss.
 """
 
 from __future__ import annotations
@@ -22,7 +24,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from shotquality.analysis.profile import profile_sentence  # noqa: E402
-from shotquality.config import METRICS_PATH, PLAYER_BOARD, PROFILE_BAND, SCORED_SHOTS  # noqa: E402
+from shotquality.config import (  # noqa: E402
+    APP_PLAYER_BOARD,
+    APP_SCORED_SHOTS,
+    METRICS_PATH,
+    PLAYER_BOARD,
+    PROFILE_BAND,
+    SCORED_SHOTS,
+)
 from shotquality.viz.charts import plot_player_chart  # noqa: E402
 
 MODEL_COLUMNS = {
@@ -32,18 +41,34 @@ MODEL_COLUMNS = {
 }
 
 
+def artifact_source() -> str | None:
+    """Prefer the full pipeline output, then the committed compact extract."""
+    if SCORED_SHOTS.is_file() and PLAYER_BOARD.is_file() and METRICS_PATH.is_file():
+        return "processed"
+    if APP_SCORED_SHOTS.is_file() and APP_PLAYER_BOARD.is_file() and METRICS_PATH.is_file():
+        return "app"
+    return None
+
+
 @st.cache_data(show_spinner=False)
-def load_artifacts():
-    scored = pd.read_parquet(SCORED_SHOTS)
-    players = pd.read_parquet(PLAYER_BOARD)
+def load_artifacts(source: str):
+    """Read local parquet only. ``source`` is ``processed`` or ``app``."""
+    if source == "processed":
+        scored_path, player_path = SCORED_SHOTS, PLAYER_BOARD
+    elif source == "app":
+        scored_path, player_path = APP_SCORED_SHOTS, APP_PLAYER_BOARD
+    else:
+        raise ValueError(f"unknown artifact source: {source}")
+    scored = pd.read_parquet(scored_path)
+    players = pd.read_parquet(player_path)
     metrics = json.loads(METRICS_PATH.read_text())
     return scored, players, metrics
 
 
 def _missing_message() -> None:
     st.error(
-        "Scored shots are not in data/processed yet. From the repo root run "
-        "`python scripts/run_pipeline.py`, then reload this page."
+        "No shot table found. Expected data/processed from "
+        "`python scripts/run_pipeline.py`, or the committed extract in data/app."
     )
 
 
@@ -55,11 +80,12 @@ def main() -> None:
         "The chart is the 2025-26 regular season, scored by a model that never saw that season."
     )
 
-    if not SCORED_SHOTS.exists() or not PLAYER_BOARD.exists() or not METRICS_PATH.exists():
+    source = artifact_source()
+    if source is None:
         _missing_message()
         return
 
-    scored, players, metrics = load_artifacts()
+    scored, players, metrics = load_artifacts(source)
     primary = metrics["primary_model"]
     # Default the selector to whichever model won on the validation season.
     default_label = next(label for label, column in MODEL_COLUMNS.items() if column == f"p_{primary}")

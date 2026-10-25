@@ -46,6 +46,7 @@ def find_repo_root() -> Path:
 ROOT = find_repo_root()
 DATA_RAW = ROOT / "data" / "raw"
 DATA_PROCESSED = ROOT / "data" / "processed"
+DATA_APP = ROOT / "data" / "app"
 FIGURES = ROOT / "figures"
 MODELS = ROOT / "models"
 
@@ -55,3 +56,9 @@ PLAYER_BOARD = DATA_PROCESSED / "player_leaderboard.parquet"
 TEAM_BOARD = DATA_PROCESSED / "team_leaderboard.parquet"
 METRICS_PATH = DATA_PROCESSED / "metrics.json"
 DATABASE_PATH = DATA_PROCESSED / "shots.duckdb"
+
+# Compact extract committed for Streamlit Community Cloud. The full
+# parquet and DuckDB files stay out of git; see scripts/export_app_data.py.
+APP_SCORED_SHOTS = DATA_APP / "scored_shots.parquet"
+APP_PLAYER_BOARD = DATA_APP / "player_leaderboard.parquet"
+APP_TEAM_BOARD = DATA_APP / "team_leaderboard.parquet"

@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.colors import TwoSlopeNorm
-from sklearn.calibration import calibration_curve
 
 from shotquality.viz.court import draw_half_court
 from shotquality.viz.style import CRIMSON, INK, MUTED, NAVY, TEAL, VALUE_CMAP, XFG_CMAP, apply_style
@@ -197,6 +196,9 @@ def plot_player_chart(
 
 def plot_calibration(scored: pd.DataFrame, path: Path | None = None, n_bins: int = 10) -> plt.Figure:
     """When the model says 40%, do shots go in about 40% of the time?"""
+    # Local import so the Streamlit app does not need scikit-learn installed.
+    from sklearn.calibration import calibration_curve
+
     apply_style()
     fig, ax = plt.subplots(figsize=(6.4, 6.0))
     y = scored["shot_made"].to_numpy()

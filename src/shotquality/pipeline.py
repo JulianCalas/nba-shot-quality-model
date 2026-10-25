@@ -26,6 +26,7 @@ from shotquality.config import (
     TEST_SEASON,
 )
 from shotquality.data.clean import build_shot_table
+from shotquality.export_app import export_app_dataset
 from shotquality.data.database import build_database
 from shotquality.data.pull import load_common_frame
 from shotquality.analysis.leaderboards import build_leaderboards
@@ -176,6 +177,14 @@ def run_pipeline(source: str = "auto") -> dict:
     }
     METRICS_PATH.write_text(json.dumps(_json_ready(metrics), indent=2))
     logger.info("Wrote %s", METRICS_PATH)
+    app_info = export_app_dataset(scored=scored, players=boards["players"], teams=boards["teams"])
+    logger.info(
+        "Wrote data/app (%s shots, %s players, %s teams, %.2f MB)",
+        app_info["shots"],
+        app_info["players"],
+        app_info["teams"],
+        app_info["total_bytes"] / 1_048_576,
+    )
     plt.close("all")
     return metrics
 
